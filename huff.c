@@ -8,20 +8,17 @@
 #include "huff.h"
 #include <stdlib.h>
 
-Huffman * Char_Tree_from_Header(FILE * input,long * NumChar){
+Huffman * Char_Tree_from_Header(FILE * input,long start[3]){
 	//Creates Huffman Tree from the input.
 	//Don't forget about the aditional zero at the end of thej header.
 	int b = 0;//Number of branch nodes
 	int l = 1;//Number of leaf nodes
 	int ch;
-	long long1;
-	long long2;
-	long long3;
 	Huffman * h;
 	fseek(input,0,SEEK_SET);
-	fscanf(input,"%ld%ld%ld",&long1, &long2, &long3);
-	printf("Hey.");
-	*NumChar = long1;
+	fread(start,sizeof(long),3,input);
+	
+	
 	fseek(input,24,SEEK_SET);
 	ch = fgetc(input);
 	if(ch != '1'){
@@ -69,6 +66,8 @@ void deallocateQueue(stack * s){
 Huffman * createLeafNode(int input){
 	Huffman * a = malloc(sizeof(Huffman));
 	a->ch = input;
+	a->left = NULL;
+	a->right = NULL;
 	return a;
 }
 
@@ -89,56 +88,72 @@ stack * StackAdd(Huffman * h, stack * top){
 	return s;
 }
 
-Huffman * Bit_Tree_from_Header(FILE * input,long * NumChar){
+Huffman * Bit_Tree_from_Header(FILE * input,long NumChar[3]){
 	//Same as above, just more squigly. Consider anti-corruption.
-	long HuffChar;
-	long HuffMax;
-	long Other;
-	fscanf(input,"%ld%ld%ld",&HuffChar,&HuffMax,&Other);
-
-	*NumChar = HuffChar;
+	fread(NumChar,sizeof(long),3,input);
 	//Find 3 long int's at the beginning before this point. One of them is HuffChar.
 	stack * s = NULL;
-	fseek(input,12,SEEK_SET);
+	fseek(input,24,SEEK_SET);
 	unsigned int ch;
 	unsigned int sch;
-	unsigned int b;
+	unsigned int b = 0;
 	int mask= 0x01;
 	int pos = 7;
 	int i = 0;
+	int l = 0;
+	int bytes = 1;
+	Huffman * h;
 
 	ch = fgetc(input);
+	
 	do{
 		 b = ch >> pos;
 		 b = b & mask;
 		 pos--;
 		 if(pos<0){
 		 	resetByte(&pos,input,&ch);
+			bytes++;
 		 }
 		 if(b == 1){
 		 	sch = ch << (7-pos);//SOLVE ON PAPER PLS.
 		 	ch = fgetc(input);
-		 	b = ch >> pos;
-		 	b = b & sch;
-		 	Huffman * h = createLeafNode(b);
+		 	b = ch >> (pos+1);
+		 	b = b | sch;
+		 	h = createLeafNode(b);
+			if(l==0){
+				s = StackAdd(h,NULL);
+			}else{
 		 	s = StackAdd(h,s);
+			}
+			l++;
 		 }else if(b == 0){
-		 	s = createBranchNode(s);
+			
+			if(i<(l-1)){
+				s = createBranchNode(s);
+			}
 		 	i++;
-		 }
+		}else{
+			printf("big issue.\n\n");
+			return NULL;
+		}
 
 
-	}while(i<(HuffChar-1));
-	return NULL;
+	}while(i<l);
+	h = s->h;
+	deallocateQueue(s);
+	//fseek(input,NumChar[2],SEEK_SET);
+	return h;
 }
 
-void * Decompress(FILE* input, FILE* output, Huffman* head,int numChar){
+void * Decompress(FILE* input, FILE* output, Huffman* head,long numChar[3]){
 	//Uses tree to decompress the file. Stops at EOF character.
+	fseek(input,(numChar[1]+24),SEEK_SET);
 	int pos = 7;
-	int a; // Input character in use
+	int a = fgetc(input); // Input character in use
 	int i = 0;
 	int ch;
-	while(i < numChar){
+	
+	while(i < numChar[2]){
 		ch = DecompHelp(head,input,&a,&pos);
 		fprintf(output,"%c",ch);
 		i++;
@@ -179,7 +194,7 @@ void * printCharLine(Huffman * head, CodeStack * CS, FILE * output2){
 	int i=0;
 	fprintf(output2,"%c : ",head->ch);
 	while(i<(CS->top)){
-		fputc(CS->Stack[i],output2);
+		fputc(CS->Stack[i]+48,output2);
 		i++;
 	}
 	fputc('\n',output2);
@@ -206,12 +221,14 @@ int DecompHelp(Huffman * head,FILE * input, int * a, int * pos){
 		return -1;
 	}else{
 		int mask = 0x01;
-		int b;
+		int b = 0;
 		if(*pos == 0){
 			b  = mask & *a;
 			if(b == 1){
+			
 				head = head->right;
 			}else if(b== 0){
+				
 				head = head->left;
 			}else{
 				printf("ERROR IN DECOMP HELP. MASKING AND POS WRONG.");
@@ -225,9 +242,11 @@ int DecompHelp(Huffman * head,FILE * input, int * a, int * pos){
 			b = mask & b;
 			*pos = *pos - 1;
 			if(b == 0){
+				
 				c = DecompHelp(head->left,input,a,pos);
 			}
 			if(b == 1){
+				
 				c = DecompHelp(head->right,input,a,pos);
 			}
 		}

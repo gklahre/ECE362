@@ -25,13 +25,13 @@ typedef struct CodeStack {
 	int maxItems;
 } CodeStack;
 
-Huffman * Char_Tree_from_Header(FILE * input,long * NumChar);
-Huffman * Bit_Tree_from_Header(FILE * input,long * NumChar);
+Huffman * Char_Tree_from_Header(FILE * input,long NumChar[3]);
+Huffman * Bit_Tree_from_Header(FILE * input,long NumChar[3]);
 stack * createBranchNode(stack * s);
 Huffman * createLeafNode(int a);
 void deallocateQueue(stack * s);
 int DecompHelp(Huffman * h,FILE* input,int * a, int * b);
-void * Decompress(FILE * input,FILE * output,Huffman * h,int a);
+void * Decompress(FILE * input,FILE * output,Huffman * h,long a[3]);
 int HCHelp(Huffman * h,CodeStack* CS,FILE*output);
 void * Huffman_codes(FILE * output,Huffman * h);
 void Pop(CodeStack * CS);
