@@ -22,8 +22,7 @@ int main(int argc, char* argv[]){
 		printf("Improper argument 1.");
 		return EXIT_FAILURE;
 	}
-	long NumChar;
-	Huffman * h;
+	long FileInfo[3];
 	if(argv[1][1]=='b'){
 		if(argc!=4){
 			printf("Improper number of arguments for bitwise header.");
@@ -38,13 +37,14 @@ int main(int argc, char* argv[]){
 			fclose(input);
 			return EXIT_FAILURE;
 		}
-		h = Bit_Tree_from_Header(input,&NumChar);
+		Huffman * h = Bit_Tree_from_Header(input,FileInfo);
 		if(h==NULL){
 			fclose(input);
 			fclose(output);
 			return EXIT_FAILURE;
 		}
-		Decompress(input,output,h,NumChar);
+		//Huffman_codes(output,h);
+		Decompress(input,output,h,FileInfo);
 		deallocateHuff(h);
 		fclose(input);
 		fclose(output);
@@ -64,7 +64,8 @@ int main(int argc, char* argv[]){
 		FILE * output1 = fopen(argv[3],"w");
 		if(output1==NULL){
 			fclose(input);
-			printf("HELP.");
+			printf("HELP ME.");
+		   
 			return EXIT_FAILURE;
 		}
 		FILE * output2 = fopen(argv[4],"w");
@@ -74,11 +75,13 @@ int main(int argc, char* argv[]){
 			printf("HALP.");
 			return EXIT_FAILURE;
 		}
-		h = Char_Tree_from_Header(input,&NumChar);
-		printf("Checkpoint 1.");
+		Huffman * h = Char_Tree_from_Header(input,FileInfo);
+		if(h==NULL){
+			return EXIT_FAILURE;
+		}
 		Huffman_codes(output1,h);
-		printf("Checkpoint 2.");
-		Decompress(input,output2,h,NumChar);
+		
+		Decompress(input,output2,h,FileInfo);
 		deallocateHuff(h);
 		fclose(input);
 		fclose(output1);
