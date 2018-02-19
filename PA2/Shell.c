@@ -63,10 +63,17 @@ static Node * insertion_sort_list(Node * head){
 	Node * SortedT = head;
 	head = head->next;
 	Node * current = SortedT;
+	current->next = NULL;
 	while(head!=NULL){
+		//NEED CORNER CASE: First & LAST
 		while(head->value < current->value){
-
+			current = current->next;
 		}
+		current->next = head
+		head = head->next;
+		current->next->next = NULL;
+		current = SortedT;
+
 	}	
 }
 
@@ -146,30 +153,46 @@ long * Load_Into_Array(char * filename,int * size){
 Node * Load_Into_List(char * filename){
 	int i;//EOF check
 	long a;
-	i = fscanf(input,"%ld",a);
+	FILE* input = fopen(filename,"r");
+	i = fread(&a,1,sizeof(long),a);
+	//NEED CORNER CASE
 	Node * head = malloc(sizeof(Node));
 	head->value = a;
 	Node * cur = head;
-	FILE * input = open(filename,"r");
-	i = fscanf(input,"%ld",a);
-	while(i!=0){
+	i = fread(&a,1,sizeof(long),input);
+	while(i!=1){
 		cur->next = malloc(sizeof(Node));
 		cur->value = a;
 		cur = cur->next;
-		i = fscanf(input,"%ld",a);
+		i = fread(&a,1,sizeof(long),input);
 	}
+	fclose(input);
 	return head;
 }
 
 int Save_From_List(char * filename,Node * head){
 	FILE * output = open(filename,"w");
-	long L;
+	//long L;
 	Node * temp;
 	while(head != NULL){
-		fprintf(output,"%ld",l);
+		fwrite(head->value,1,sizeof(long),output);
 		temp = head->next;
 		free(head);
 		head = temp;
 	}
+	fclose(output);
 	return EXIT_SUCCESS;
+}
+
+int Save_From_Array(char * filename,long * array, int size){
+	FILE * output = open(filename,"w");
+	int i = 0; //iterator
+
+	//Might want to go with for loop instead.
+	while(i < size){
+		fprintf(output,"%ld",array[i]);
+	}
+
+	free(array);
+	
 }
