@@ -1,21 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "packing.h"
 
-void Print_Postorder(Tree * t,char * filename);
 Tree * Load_binary_tree(char * filename);
+Tree * create_tree(FILE * input);
+Tree * allocateBranch(int ch);
+Tree * allocateLeaf(int chInt, double width, double height);
+void deallocateTree(Tree * t);
+void deallocateNode(Tree * t);
+void printInorder(Tree * t);
+void PP(Tree * t, FILE * output);
+void coorRec(Tree * t, double h, double w, FILE * output);
+void SizeRec(Tree * t,FILE * output);
 
-void Print_Postorder(Tree * t){
+/*
+void Printf_Postorder(Tree * t){
 	if(t->left == NULL || t->right == NULL){
-		printf("%d",t->value);
+		printf("%d",t->chInt);
 		return;
 	}
 	Print_Postorder(t->left);
 	Print_Postorder(t->right);
-	printf("%c",t->char);
+	printf("%c",t->chInt);
 	return;
 }
-
+*/
 Tree * Load_binary_tree(char * filename){
 	int c;
 	FILE * input = fopen(filename,"r");
@@ -28,6 +38,7 @@ Tree * Load_binary_tree(char * filename){
 		deallocateTree(head);
 		return NULL;
 	}
+	fclose(input);
 	return head;
 }
 
@@ -36,7 +47,7 @@ Tree * create_tree(FILE * input){
 	int ch;
 	ch = fgetc(input);
 	if(ch == 'H' || ch == 'V'){
-		Tree * head = allocateBranch(&ch);
+		Tree * head = allocateBranch(ch);
 		if(head == NULL){
 			return NULL;
 		}
@@ -47,7 +58,7 @@ Tree * create_tree(FILE * input){
 			deallocateNode(head);
 			return NULL;
 		}
-		head->right = create_tree(input)
+		head->right = create_tree(input);
 		if(head->right == NULL){
 			deallocateTree(head->left);
 			deallocateNode(head);
@@ -71,7 +82,7 @@ Tree * create_tree(FILE * input){
 	}
 }
 
-Tree * allocateBranch(char ch){
+Tree * allocateBranch(int ch){
 	Tree * branch = malloc(sizeof(Tree));
 	if(branch == NULL){
 		return NULL;
@@ -96,10 +107,10 @@ Tree * allocateLeaf(int n,double h, double w){
 }
 
 void deallocateTree(Tree * h){
-	if(Tree->left != NULL){
+	if(h->left != NULL){
 		deallocateTree(h->left);
 	}
-	if(Tree->right != NULL){
+	if(h->right != NULL){
 		deallocateTree(h->right);
 	}
 	free(h);
@@ -117,21 +128,22 @@ void printInorder(Tree * h){
 		return;
 	}
 	printInorder(h->left);
-	printf("%d\n",h->chInt);
+	printf("%c\n",h->chInt);
 	printInorder(h->right);
 	return;
 }
 
 void Print_Postorder(Tree * h,char * filename){
-	FILE * output = fopen(argv[2],"w");
+	FILE * output = fopen(filename,"w");
 	PP(h,output);
 	fclose(output);
 	return;
 }
 
-void PP(Tree * head,output){
+void PP(Tree * head,FILE * output){
 	if(head->left == NULL || head->right == NULL){
 		fprintf(output,"%d(%le,%le)\n",head->chInt,head->width,head->height);
+		return;
 	}
 	PP(head->left,output);
 	PP(head->right,output);
@@ -146,13 +158,13 @@ void Packing_it_in(Tree * head){
 	Packing_it_in(head->left);
 	Packing_it_in(head->right);
 	if(head->chInt == 'V'){
-		head->height = (head->left->height + head->right->height);
-		head->width = fmax(head->left->width,head->right->width);
+		head->height = fmax(head->left->height, head->right->height);
+		head->width = (head->left->width + head->right->width);
 		return;
 	}
 	if(head->chInt == 'H'){
-		head->width = (head->left->width + head->right->width);
-		head->height = fmax(head->left->height,head->right->height);
+		head->width = fmax(head->left->width, head->right->width);
+		head->height = (head->left->height + head->right->height);
 	}
 	return;
 }
@@ -183,16 +195,25 @@ void coorRec(Tree * t, double h, double w, FILE * output){
 }
 
 void printSize(Tree * t, char * filename){
-	FILE* output = fopen(filename,"w");
-	printSize(t,output);
+	FILE * output = fopen(filename,"w");
+	SizeRec(t,output);
 	fclose(output);
 }
 
-void SizeRec(Tree * t,output){
+void SizeRec(Tree * t,FILE * output){
 	if(t->left == NULL){
 		fprintf(output,"%d(%le,%le)\n",t->chInt,t->width,t->height);
+		return;
 	}
 	fprintf(output,"%c(%le,%le)\n",t->chInt,t->width,t->height);
 	SizeRec(t->left,output);
 	SizeRec(t->right,output);
+	return;
+}
+
+double fmax(double first, double second){
+	if(first < second){
+		return second; 
+	}
+	return first;
 }
