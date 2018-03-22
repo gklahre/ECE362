@@ -77,20 +77,86 @@ int q_help(int * array,int front, int back){
 	}else{
 		int pivot = median_pivot(array,front,back);
 	}
-	int true_front = front;
-	int true_back = back;
-	while(pivot > array[front]){
-		front++; 
-	}
-	while(pivot <= array[back]){
-		back--;
-	}
+	pivot_loc = lineswap(array,front,back);
 
-	q_help(array,true_front,pivot_loc); //pivot loc is made up. Will need to be updated.
-	q_help(array,pivot_loc,true_back);
+	q_help(array,front,pivot_loc-1); //pivot loc is made up. Will need to be updated.
+	q_help(array,pivot_loc+1,back);
 	return EXIT_SUCCESS;	
 }
 
-int median_pivot(int * array){
+int median_pivot(int * array,int front, int back){
+	return best_of_three(array,front,back);
 	//Return the median of the five data points: first, first quad, median, third quad, last. Swap pivot number to the front.
+}
+
+int best_of_three(int * array, int front, int back){
+	int mid = (front + back)/2;
+	if(array[front]> array[back]){
+		if(array[back]>array[mid]){
+			swap(array,front,back);
+			return array[front];
+		}
+		if(array[front]>array[mid])
+			swap(array,front,mid);
+			return array[front];
+		}
+		return array[front];
+	}else{
+		if(array[mid]>array[back]){
+			swap(array,front,back);
+			return array[front];
+		}
+		if(array[mid]>array[front]){
+			swap(array,front,mid);
+			return array[front];
+		}
+		return array[front];
+	}
+}
+
+int lineswap(int * array,int front, int back){
+	int tf = front;
+	front = front + 1;
+	while(1){
+		while(pivot > array[front]){
+			front++; 
+		}
+		while(pivot <= array[back]){
+			back--;
+		}
+		if(front<back){
+			swap(array,tf,back);
+			return back;
+		}
+		swap(array,front,back);
+	}
+
+}
+
+void swap(int * array,int first, int second){
+	int temp = array[first];
+	array[first] = array[second];
+	array[second] = temp;
+	return;
+}
+
+int print_sorted(int * array,char * filename){
+	int i = 0;
+	FILE* fp = fopen(filename,"w");
+	while(i < len(array)){
+		fputs(fp,sizeof(char),1,array[i]);
+		i++;
+	}
+	fclose(fp);
+}
+
+int check_array(int * array){
+	i = 1;
+	while(array[i-1]<array[i] && i<len(array)){
+		i++;
+	}
+	if(i < len(array)){
+		return(0);
+	}
+	return(1);
 }
