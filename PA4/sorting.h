@@ -1,15 +1,15 @@
 #ifndef Sorting_H
 #define Sorting_H
 
-int * merge_sort(int * array);
-int * merge_sort_array(int * array,int * aux,,int total,int size);
-int quicksort(int * array);
-int q_help(int * array,int front, int back);
-int median_pivot(int * array,int front,int back);
-int best_of_three(int * array,int front,int back);
-int lineswap(int * array,int front,int back);
-void swap(int * array,int first,int second);
-int print_sorted(int * array,char * filename);
-int check_array(int * array);
+long * MergeSort(long * array,long size);
+long * MergeSortArray(long * array,long * aux,long total,long size);
+long quicksort(long * array,long size);
+long QHelp(long * array,long front, long back);
+long MedianPivot(long * array,long front,long back);
+long BestOfThree(long * array,long front,long back);
+long lineswap(long * array,long front,long back,long pivot);
+void swap(long * array,long first,long second);
+long theMerge(long * array,long * aux,long f_min,long f_max,long s_min,long s_max,long loc);
 
-#endif //Sorting_H
+#endif
+//Sorting_H
