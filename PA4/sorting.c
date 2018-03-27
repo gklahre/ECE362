@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stlib.h>
+#include "sorting.h"
 
 int * merge_sort(int * array){
 	int a = sizeof(array);
@@ -14,9 +15,9 @@ int * merge_sort(int * array){
 		free(array);
 	}
 	return ret;
-
 }
-int merge_sort_array(int * arary, int * aux, int total, int size){
+
+int * merge_sort_array(int * arary, int * aux, int total, int size){
 	if(size >= total){
 		return array;
 	}
@@ -24,14 +25,14 @@ int merge_sort_array(int * arary, int * aux, int total, int size){
 	int i = 0;
 	int sub_num = 0;
 	int first_min, first_max, sec_min, sec_max;
-	int num_of_new_subsections = (((total/size)+1)/2); //Calculates the number of merges to take place. Unfortunately, rather complicated.
+	int num_of_new_subsections = (total/(size*2)); //Calculates the number of merges to take place. Unfortunately, rather complicated.
 	while(i < num_of_new_subsections){
 		first_min = sub_num * size;
 		sub_num++;
 		first_max = sub_num * size;
 		sec_min = first_max;
 		sub_num++;
-		second_max = sub_num * size;
+		sec_max = sub_num * size;
 		while(first_min != first_max && sec_min != sec_max){
 			if(array[first_min] < array[sec_min]){
 				aux[loc] = array[first_min];
@@ -114,6 +115,27 @@ int best_of_three(int * array, int front, int back){
 	}
 }
 
+median_insertion_sort(int * array, int front, int back, int points){
+	int range = front - back;
+	int gap =  range / points
+	int med =  (points / 2) + 1;
+	int i = 1;
+	int j;
+	int x;
+	while(i < points){
+		x = array[front + i * gap];
+		j = i - 1;
+		while(x < array[front + gap * j] && j >= 0){
+			array[front + gap * (j + 1)] = array[front + gap * j];
+			j--;
+		}
+		array[front + gap * (j+1)] = x;
+		i++;
+	}
+	swap(array,front,(front + gap * med));
+	return array[front];
+}
+
 int lineswap(int * array,int front, int back){
 	int tf = front;
 	front = front + 1;
@@ -130,7 +152,6 @@ int lineswap(int * array,int front, int back){
 		}
 		swap(array,front,back);
 	}
-
 }
 
 void swap(int * array,int first, int second){

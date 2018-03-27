@@ -1,5 +1,5 @@
-#ifndef Sorting_H
-#define Sorting_H
+#ifndef SORTING_H
+#define SORTING_H
 
 int * merge_sort(int * array);
 int * merge_sort_array(int * array,int * aux,,int total,int size);
@@ -12,4 +12,4 @@ void swap(int * array,int first,int second);
 int print_sorted(int * array,char * filename);
 int check_array(int * array);
 
-#endif //Sorting_H
+#endif //SORTING_H
