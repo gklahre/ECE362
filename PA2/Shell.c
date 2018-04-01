@@ -33,7 +33,7 @@ static int Shell_Sort_Array_help(long * array,int ArraySize,int n, double * swap
 Node * Shell_Sort_List(Node * head,double * swaps){
 	//Bunch of checks at the beginning to make sure the list is proper.
 	Node * current = head;
-	int size;
+	int size = 0;
 	while(current->next != NULL){
 		size++;
 		current = current->next;
@@ -43,15 +43,18 @@ Node * Shell_Sort_List(Node * head,double * swaps){
 }
 
 static Node * Shell_list_help(Node * head,int size, int n,double * swaps){
-	if(n > size){
-		return;
+	if(n >= size){
+		return head;
 	}else{
-		Shell_list_help(head,size,(3*n)+1,swaps);
+		head = Shell_list_help(head,size,(3*n)+1,swaps);
 	}
 	List* l = Create_lists(head,n);
 	list *sec = l;
-	while(sec!=NULL){
-		sec->node = insertion_sort_list(sec->node);
+	int i = 0;
+	while(i < n){
+		sec->node = insertion_sort_list(sec->node,swaps);
+		sec = sec->next;
+		i++;
 	}
 	head = disolveLists(l);
 	return head;
@@ -59,6 +62,7 @@ static Node * Shell_list_help(Node * head,int size, int n,double * swaps){
 
 
 //Badly needs revision
+/*
 static Node * insertion_sort_list(Node * head){
 	Node * SortedT = head;
 	head = head->next;
@@ -76,6 +80,38 @@ static Node * insertion_sort_list(Node * head){
 
 	}	
 }
+*/
+static Node * insertion_sort_list(Node * head,double * swaps){
+	Node * sortedT = head;
+	Node * unsortedT = head->next;
+	sortedT->next = NULL;
+	Node * curS;
+	Node * prevS;
+	Node * temp;
+	while(unsortedT != NULL){
+		curS = sortedT;
+		prevS = NULL;
+		while(curS != NULL && unsortedT->value > sortedT->value){
+			*swaps++;
+			prevS = curS;
+			curS = curS->next;
+		}
+		*swaps++;
+		temp = unsortedT;
+		unsortedT = unsortedT->next;
+		if(curS == NULL){
+			temp->next = NULL;
+		}else{
+			temp->next = curS;
+		}
+		if(prevS == NULL){
+			sortedT = temp;
+		}else{
+			prevS->next = temp;
+		}
+	}
+	return sortedT;
+}
 
 static List * Create_lists(Node * head,int n){
 	int i = 1;
@@ -83,6 +119,7 @@ static List * Create_lists(Node * head,int n){
 	l->next = NULL;
 	l->node = head;
 	head = head->next;
+	l->node->next = NULL;
 	List * prev = l;
 	Node * temp;
 	while(i<n){
@@ -95,17 +132,14 @@ static List * Create_lists(Node * head,int n){
 		prev = cur;
 		i++;
 	}
+	cur->next = l;
+	cur = l;
 	while(head != NULL){
-		if(cur == NULL){
-			cur = l;
-		}
 		temp = cur->node;
-		while(temp->next!=NULL){
-			temp = temp->next;
-		}
-		temp->next = head;
+		cur->node = head;
 		head = head->next;
-		temp->next->next = NULL;
+		cur->node->next = temp;
+		cur = cur->next;
 	}	
 	return l;
 }
