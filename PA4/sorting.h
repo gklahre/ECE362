@@ -1,15 +1,16 @@
-#ifndef Sorting_H
-#define Sorting_H
+#ifndef SORTING_H
+#define SORTING_H
 
-long * MergeSort(long * array,long size);
-long * MergeSortArray(long * array,long * aux,long total,long size);
-long quicksort(long * array,long size);
-long QHelp(long * array,long front, long back);
-long MedianPivot(long * array,long front,long back);
-long BestOfThree(long * array,long front,long back);
-long lineswap(long * array,long front,long back,long pivot);
-void swap(long * array,long first,long second);
-long theMerge(long * array,long * aux,long f_min,long f_max,long s_min,long s_max,long loc);
+void Merge_Sort(long * array,int size);
+long * MergeSortArray(long * array,long * aux,int total,int size);
+long Quick_Sort(long * array,int size);
+void QHelp(long * array,int front, int back);
+long MedianPivot(long * array,int front,int back);
+long BestOfThree(long * array,int front,int back);
+int lineswap(long * array,int front,int back,long pivot);
+void swap(long * array,int first,int second);
+long theMerge(long * array,long * aux,int f_min,int f_max,int s_min,int s_max,int loc);
+long median_insertion_sort(long * array, int front, int back, int points);
 
-#endif
-//Sorting_H
+#endif //SORTING_H
+
