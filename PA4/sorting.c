@@ -1,31 +1,35 @@
 #include <stdio.h>
-#include <stlib.h>
+#include <stdlib.h>
 #include "sorting.h"
 
-int * merge_sort(int * array){
-	int a = sizeof(array);
-	if(a == 1 || a == 0){
-		return array;
+void Merge_Sort(long * array, int size){
+	//Not going to lie: if you had made it return the array rather than void I could skip the copy step and save a lot of time. But alas...constraints.
+	if(size == 1 || size == 0){
+		return;
 	}
-	int * aux = malloc(a*sizeof(int));
-	int * ret = merge_sort_array(array,aux,a,1);
+	long * aux = malloc(size*sizeof(long));
+	long * ret = MergeSortArray(array,aux,size,1);
 	if(ret == array){
 		free(aux);
 	}else{
-		free(array);
+		int i;
+		for(i=0;i<size;i++){
+			array[i] = aux[i];
+		}	
+		free(aux);
 	}
-	return ret;
+	return;
 }
-
-int * merge_sort_array(int * arary, int * aux, int total, int size){
+long * MergeSortArray(long * array, long * aux, int total, int size){
 	if(size >= total){
 		return array;
 	}
-	int loc = 0;
-	int i = 0;
-	int sub_num = 0;
-	int first_min, first_max, sec_min, sec_max;
-	int num_of_new_subsections = (total/(size*2)); //Calculates the number of merges to take place. Unfortunately, rather complicated.
+	long loc = 0;
+	long i = 0;
+	long sub_num = 0;
+	long first_min, first_max, sec_min, sec_max;
+	long num_of_new_subsections = (total/(size*2)); //Calculates the number of merges to take place. Unfortunately, rather complicated.
+
 	while(i < num_of_new_subsections){
 		first_min = sub_num * size;
 		sub_num++;
@@ -33,151 +37,154 @@ int * merge_sort_array(int * arary, int * aux, int total, int size){
 		sec_min = first_max;
 		sub_num++;
 		sec_max = sub_num * size;
-		while(first_min != first_max && sec_min != sec_max){
-			if(array[first_min] < array[sec_min]){
-				aux[loc] = array[first_min];
-				first_min++;
-			}else{
-				aux[loc] = array[sec_min];
-				sec_min++;
-			}
-			loc++;
-		}
-		while(first_min != first_max){
-			aux[loc] = array[first_min];
-			first_min++;
-			loc++;
-		}
-		while(sec_min != sec_max){
-			aux[loc] = array[sec_min];
-			sec_min++;
-			loc++;
-		}
+		loc = theMerge(array,aux,first_min,first_max,sec_min,sec_max,loc);
 		i++;
 	}
-	while(loc < total){
-		aux[loc] = array[loc];
+	if(total%(size*2)>size){
+		loc = theMerge(array,aux,loc,loc+size,loc+size,total,loc);
+	}else{
+		while(loc < total){
+		        aux[loc] = array[loc];
+			loc++;
+		}
+	}
+	return MergeSortArray(aux,array,total,size*2);	
+}
+long theMerge(long * array,long * aux,int first_min,int first_max,int sec_min,int sec_max,int loc){
+	while(first_min != first_max && sec_min != sec_max){
+		if(array[first_min] < array[sec_min]){
+			aux[loc] = array[first_min];
+			first_min++;
+		}else{
+			aux[loc] = array[sec_min];
+			sec_min++;
+		}
 		loc++;
 	}
-	return merge_sort_array(aux,array,total,size*2);	
+	while(first_min != first_max){
+		aux[loc] = array[first_min];
+		first_min++;
+		loc++;
+	}
+	while(sec_min != sec_max){
+		aux[loc] = array[sec_min];
+		sec_min++;
+		loc++;
+	}
+	return loc;
+
 }
 
-int quicksort(int * array){
-	int size = sizeof(array);
-	q_help(array,0,size-1);
+
+long Quick_Sort(long * array,int size){
+	QHelp(array,0,size-1);
 	return EXIT_SUCCESS;
 }
 
-int q_help(int * array,int front, int back){
+void QHelp(long * array,int front,int back){
 	//Efficency notes: Check to see if changing which while loop has the equal sign has any effect on performance time.
-	if(front-back < 1){
-		return EXIT_SUCESS;
+	long pivot;
+	if(back - front <= 1){
+		return;
 	}
-	if(back - front < 5){
+	if(back - front < 3){
 		pivot = array[front];
 	}else{
-		int pivot = median_pivot(array,front,back);
+		pivot = MedianPivot(array,front,back);
 	}
-	pivot_loc = lineswap(array,front,back);
+	int pivot_loc = lineswap(array,front,back,pivot);
 
-	q_help(array,front,pivot_loc-1); //pivot loc is made up. Will need to be updated.
-	q_help(array,pivot_loc+1,back);
-	return EXIT_SUCCESS;	
+	QHelp(array,front,pivot_loc); //pivot loc is made up. Will need to be updated.
+	QHelp(array,pivot_loc+1,back);
+	return;	
 }
 
-int median_pivot(int * array,int front, int back){
-	return best_of_three(array,front,back);
-	//Return the median of the five data points: first, first quad, median, third quad, last. Swap pivot number to the front.
+long MedianPivot(long * array,int front,int back){
+	int rng = (back - front);
+	int lg = 0;
+	if(rng > 3125){
+		while(rng >= 5){
+			rng = rng / 5;
+			lg++;
+		}
+		lg = (lg/2) + 1;
+		return median_insertion_sort(array,front,back,lg);		
+	}else{
+		return BestOfThree(array,front,back);
+	}
 }
 
-int best_of_three(int * array, int front, int back){
+long BestOfThree(long * array, int front, int back){
 	int mid = (front + back)/2;
 	if(array[front]> array[back]){
 		if(array[back]>array[mid]){
-			swap(array,front,back);
-			return array[front];
+			//swap(array,front,back);
+			return array[back];
 		}
-		if(array[front]>array[mid])
-			swap(array,front,mid);
-			return array[front];
+		if(array[front]>array[mid]){
+			//swap(array,front,mid);
+			return array[mid];
 		}
 		return array[front];
 	}else{
 		if(array[mid]>array[back]){
-			swap(array,front,back);
-			return array[front];
+			//swap(array,front,back);
+			return array[back];
 		}
 		if(array[mid]>array[front]){
-			swap(array,front,mid);
-			return array[front];
+			//swap(array,front,mid);
+			return array[mid];
 		}
 		return array[front];
 	}
 }
 
-median_insertion_sort(int * array, int front, int back, int points){
-	int range = front - back;
-	int gap =  range / points
+long median_insertion_sort(long * array, int front, int back, int points){
+	//Using insertion sort to find the median because it is efficient on small arrays. I'm assuming this is allowed. If not.....................Please notify me by email so I can do a quick correction.
+	int range = back - front;
+	int gap =  range / points;
 	int med =  (points / 2) + 1;
 	int i = 1;
-	int j;
-	int x;
+	int k;
+	long x;
 	while(i < points){
 		x = array[front + i * gap];
-		j = i - 1;
-		while(x < array[front + gap * j] && j >= 0){
-			array[front + gap * (j + 1)] = array[front + gap * j];
-			j--;
+		k = i - 1;
+		while(k>=0 && x < array[front + gap * k]){
+			array[front + gap * (k + 1)] = array[front + gap * k];
+			k--;
 		}
-		array[front + gap * (j+1)] = x;
+		array[front + gap * (k+1)] = x;
 		i++;
 	}
-	swap(array,front,(front + gap * med));
-	return array[front];
+	//swap(array,front,(front + gap * med));
+	return array[front + (gap * med)];
 }
 
-int lineswap(int * array,int front, int back){
-	int tf = front;
-	front = front + 1;
+int lineswap(long * array,int front,int back,long pivot){
 	while(1){
-		while(pivot > array[front]){
+		while(pivot > array[front]&& front <= back){
 			front++; 
 		}
-		while(pivot <= array[back]){
+		while(pivot < array[back] && back>= front){
 			back--;
 		}
-		if(front<back){
-			swap(array,tf,back);
+		if(front>=back){
 			return back;
 		}
 		swap(array,front,back);
+		//printf("here.\n");
 	}
 }
 
-void swap(int * array,int first, int second){
-	int temp = array[first];
+void swap(long * array,int first,int second){
+	long temp = array[first];
 	array[first] = array[second];
 	array[second] = temp;
 	return;
 }
 
-int print_sorted(int * array,char * filename){
-	int i = 0;
-	FILE* fp = fopen(filename,"w");
-	while(i < len(array)){
-		fputs(fp,sizeof(char),1,array[i]);
-		i++;
-	}
-	fclose(fp);
-}
 
-int check_array(int * array){
-	i = 1;
-	while(array[i-1]<array[i] && i<len(array)){
-		i++;
-	}
-	if(i < len(array)){
-		return(0);
-	}
-	return(1);
-}
+
+
+
